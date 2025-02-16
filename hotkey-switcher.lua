@@ -8,6 +8,7 @@ obs = obslua
 local state_break = false
 local state_audio_kbmicro = true
 local state_audio_cammicro = true
+--local state_audio_desktop_audio = true
 
 function on_start(event)
     if event == obs.OBS_FRONTEND_EVENT_STREAMING_STARTED then
@@ -130,4 +131,4 @@ print('sources', inspect(sources))
 -- Примеры вызовов функций
 state_break = toggle_source_visibility("break", state_break)
 toggle_audio_source_mute("Desktop Audio", false)
-
+--]]
