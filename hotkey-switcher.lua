@@ -10,7 +10,7 @@ local state_audio_kbmicro = true
 local state_audio_cammicro = true
 --local state_audio_desktop_audio = true
 
-function on_start(event)
+function on_frontend_event(event)
     if event == obs.OBS_FRONTEND_EVENT_STREAMING_STARTED then
         obs.script_log(obs.LOG_INFO, "Трансляция началась!")
     elseif event == obs.OBS_FRONTEND_EVENT_STREAMING_STOPPED then
@@ -19,49 +19,59 @@ function on_start(event)
 end
 
 -- Название сцены, которую будем использовать
-local scene_name = "Scene"
+--local scene_name = "Scene"
 
--- Функция для получения списка источников на сцене
-function get_scene_sources(scene)
-    local sources = {}
-    local scene_source = obs.obs_get_source_by_name(scene)
-    if scene_source then
-        local scene_item = obs.obs_scene_from_source(scene_source)
-        local items = obs.obs_scene_enum_items(scene_item)
-        if items then
-            for _, item in ipairs(items) do
-                local source = obs.obs_sceneitem_get_source(item)
-                table.insert(sources, source)
-            end
-            obs.sceneitem_list_release(items)
+-- Функция, возвращающая список всех сцен (по их названиям)
+local function get_scene_names()
+    local scene_list = obs.obs_frontend_get_scenes()
+    local names = {}
+
+    if scene_list ~= nil then
+        for i = 1, #scene_list do
+            local scene_source = scene_list[i]
+            local scene_name = obs.obs_source_get_name(scene_source)
+            table.insert(names, scene_name)
         end
-        obs.obs_source_release(scene_source)
+
+        -- ВАЖНО: освободить все источники после использования
+        for i = 1, #scene_list do
+            obs.obs_source_release(scene_list[i])
+        end
     end
-    return sources
+
+    return names
 end
+
 
 -- Функция для изменения видимости источника
 function toggle_source_visibility(source_name, visible)
     print(format(
         "toggle_source_visibility: source_name '%s'", source_name
     ))
-    local scene_source = obs.obs_get_source_by_name(scene_name)
-    if scene_source then
-        local scene_item = obs.obs_scene_from_source(scene_source)
-        local items = obs.obs_scene_enum_items(scene_item)
-        print("toggle_source_visibility: items " .. inspect(items))
-        if items then
-            for _, item in ipairs(items) do
-                local source = obs.obs_sceneitem_get_source(item)
-                if obs.obs_source_get_name(source) == source_name then
-                    print("toggle_source_visibility: source found")
-                    obs.obs_sceneitem_set_visible(item, visible)
+
+    local scenes_all = get_scene_names();
+
+    for _, scene_name in ipairs(scenes_all) do
+
+        local scene_source = obs.obs_get_source_by_name(scene_name)
+        if scene_source then
+            local scene_item = obs.obs_scene_from_source(scene_source)
+            local items = obs.obs_scene_enum_items(scene_item)
+            print("toggle_source_visibility: items " .. inspect(items))
+            if items then
+                for _, item in ipairs(items) do
+                    local source = obs.obs_sceneitem_get_source(item)
+                    if obs.obs_source_get_name(source) == source_name then
+                        print("toggle_source_visibility: source found")
+                        obs.obs_sceneitem_set_visible(item, visible)
+                    end
                 end
+                obs.sceneitem_list_release(items)
             end
-            obs.sceneitem_list_release(items)
+            obs.obs_source_release(scene_source)
         end
-        obs.obs_source_release(scene_source)
     end
+
     return not visible
 end
 
@@ -123,10 +133,6 @@ function script_properties()
     obs.obs_properties_add_text(props, "source_name", "Source Name to Toggle", obs.OBS_TEXT_DEFAULT)
     return props
 end
-
--- Получение и вывод списка источников
-local sources = get_scene_sources(scene_name)
-print('sources', inspect(sources))
 
 -- Примеры вызовов функций
 state_break = toggle_source_visibility("break", state_break)
