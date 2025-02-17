@@ -7,7 +7,7 @@ obs = obslua
 
 local state_break = false
 local state_audio_kbmicro = true
-local state_audio_cammicro = true
+local state_audio_cammicro = false
 --local state_audio_desktop_audio = true
 
 --[[
@@ -138,5 +138,5 @@ end
 
 -- Примеры вызовов функций
 --state_break = toggle_source_visibility("break", state_break)
-toggle_audio_source_mute("Desktop Audio", false)
+--toggle_audio_source_mute("Desktop Audio", false)
 --]]
