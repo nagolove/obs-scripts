@@ -10,6 +10,7 @@ local state_audio_kbmicro = true
 local state_audio_cammicro = true
 --local state_audio_desktop_audio = true
 
+--[[
 function on_frontend_event(event)
     if event == obs.OBS_FRONTEND_EVENT_STREAMING_STARTED then
         obs.script_log(obs.LOG_INFO, "Трансляция началась!")
@@ -17,6 +18,7 @@ function on_frontend_event(event)
         obs.script_log(obs.LOG_INFO, "Трансляция остановлена!")
     end
 end
+--]]
 
 -- Название сцены, которую будем использовать
 --local scene_name = "Scene"
@@ -111,7 +113,7 @@ function script_load(settings)
     local hotkey_save_array = obs.obs_data_get_array(settings, "toggle_source_visibility")
     obs.obs_hotkey_load(hotkey_id, hotkey_save_array)
     obs.obs_data_array_release(hotkey_save_array)
-    obs.obs_frontend_add_event_callback(on_event)
+    --obs.obs_frontend_add_event_callback(on_event)
 end
 
 function script_save(settings)
@@ -135,6 +137,6 @@ function script_properties()
 end
 
 -- Примеры вызовов функций
-state_break = toggle_source_visibility("break", state_break)
+--state_break = toggle_source_visibility("break", state_break)
 toggle_audio_source_mute("Desktop Audio", false)
 --]]
